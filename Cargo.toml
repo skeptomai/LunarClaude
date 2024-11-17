@@ -1,0 +1,11 @@
+[package]
+name = "lunar_lander"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ggez = "0.9"
+rand = "0.8"
+glam = { version = "0.24", features = ["mint"] }
+log = "0.4"
+env_logger = "0.10"
