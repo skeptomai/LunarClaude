@@ -2,6 +2,7 @@ use ggez::{Context, GameResult};
 use ggez::graphics::{self, Canvas, Color, DrawMode, Mesh, MeshBuilder};
 use ggez::mint::Point2;
 use glam::Vec2;
+use log::info;
 
 const GRAVITY: f32 = 1.62; // Lunar gravity (m/s²)
 const THRUST_POWER: f32 = 3.5;
@@ -40,7 +41,7 @@ impl LunarLander {
                 self.thrust * self.angle.sin() * THRUST_POWER    // Positive because up is positive y
             );
 
-            println!("Thrust: {}, Angle: {}, Vector: {:?}", self.thrust, self.angle, thrust_vector); // Debug
+            info!("Thrust: {}, Angle: {}, Vector: {:?}", self.thrust, self.angle, thrust_vector); // Debug
 
             self.velocity += thrust_vector * DT;
             self.fuel -= self.thrust * 0.5;
@@ -157,7 +158,7 @@ impl LunarLander {
     pub fn apply_thrust(&mut self, amount: f32) {
         self.thrust = if self.fuel > 0.0 {
             let thrust = amount.clamp(0.0, 1.0);
-            println!("Applying thrust: {}", thrust); // Debug log
+            info!("Applying thrust: {}", thrust); // Debug log
             thrust
         } else {
             0.0

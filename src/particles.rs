@@ -1,6 +1,7 @@
 use ggez::{Context, GameResult};
 use ggez::graphics::{self, Canvas, Color, DrawMode, Mesh};
 use ggez::mint::Point2;
+use log::info;
 use rand::Rng;
 
 pub struct Particle {
@@ -45,6 +46,7 @@ impl Particle {
 
 pub struct Explosion {
     particles: Vec<Particle>,
+    notified_finished: bool,
 }
 
 impl Explosion {
@@ -54,12 +56,13 @@ impl Explosion {
         for _ in 0..100 {
             particles.push(Particle::new(x, y));
         }
-        Explosion { particles }
+        Explosion { particles, notified_finished: false }
     }
 
     pub fn update(&mut self) {
-        if self.is_finished() {
-            println!("Explosion finished!");
+        if self.is_finished() && !self.notified_finished {
+            info!("Explosion finished!");
+            self.notified_finished = true;
         }
         // Update all particles and remove dead ones
         for particle in &mut self.particles {
