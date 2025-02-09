@@ -1,6 +1,6 @@
-use ggez::{Context, GameResult};
 use ggez::graphics::{self, Canvas, Color, DrawMode, Mesh, MeshBuilder};
 use ggez::mint::Point2;
+use ggez::{Context, GameResult};
 use glam::Vec2;
 use log::info;
 
@@ -35,13 +35,16 @@ impl LunarLander {
 
     pub fn update(&mut self) {
         if self.fuel > 0.0 && self.thrust > 0.0 {
-            // Apply thrust     
+            // Apply thrust
             let thrust_vector = Vec2::new(
-                -self.thrust * self.angle.cos() * THRUST_POWER,  // Negative because right is positive x
-                self.thrust * self.angle.sin() * THRUST_POWER    // Positive because up is positive y
+                -self.thrust * self.angle.cos() * THRUST_POWER, // Negative because right is positive x
+                self.thrust * self.angle.sin() * THRUST_POWER,  // Positive because up is positive y
             );
 
-            info!("Thrust: {}, Angle: {}, Vector: {:?}", self.thrust, self.angle, thrust_vector); // Debug
+            info!(
+                "Thrust: {}, Angle: {}, Vector: {:?}",
+                self.thrust, self.angle, thrust_vector
+            ); // Debug
 
             self.velocity += thrust_vector * DT;
             self.fuel -= self.thrust * 0.5;
@@ -50,7 +53,7 @@ impl LunarLander {
         // Apply gravity
         //self.velocity.y -= GRAVITY * DT;
         // Should be
-        self.velocity.y -= GRAVITY * DT;  // Add gravity since positive y is up
+        self.velocity.y -= GRAVITY * DT; // Add gravity since positive y is up
 
         // Update position
         self.position.x += self.velocity.x * DT;
@@ -77,42 +80,49 @@ impl LunarLander {
     fn create_body_mesh(&self, ctx: &mut Context) -> GameResult<Mesh> {
         let points = self.get_vertices();
         let legs = self.get_legs_points();
-        
+
         let mut mb = MeshBuilder::new();
-        
+
         // Draw main body
         mb.polygon(DrawMode::fill(), &points, Color::WHITE)?;
-        
+
         // Draw legs
         mb.line(&[legs[0], points[1]], 2.0, Color::WHITE)?;
         mb.line(&[legs[1], points[2]], 2.0, Color::WHITE)?;
-        
+
         Ok(Mesh::from_data(ctx, mb.build()))
     }
 
     fn create_flame_mesh(&self, ctx: &mut Context) -> GameResult<Mesh> {
         let flame_points = self.get_flame_vertices();
-        
+
         let mut mb = MeshBuilder::new();
-        mb.polygon(DrawMode::fill(), &flame_points, Color::new(1.0, 0.5, 0.0, self.thrust))?;
-        
+        mb.polygon(
+            DrawMode::fill(),
+            &flame_points,
+            Color::new(1.0, 0.5, 0.0, self.thrust),
+        )?;
+
         Ok(Mesh::from_data(ctx, mb.build()))
     }
 
     fn get_vertices(&self) -> Vec<Point2<f32>> {
         let cos_angle = self.angle.cos();
         let sin_angle = self.angle.sin();
-        
+
         vec![
-            Point2 { // Nose
+            Point2 {
+                // Nose
                 x: self.position.x + (0.0 * cos_angle - 15.0 * sin_angle),
                 y: self.position.y + (0.0 * sin_angle + 15.0 * cos_angle),
             },
-            Point2 { // Left side
+            Point2 {
+                // Left side
                 x: self.position.x + (-10.0 * cos_angle - (-10.0) * sin_angle),
                 y: self.position.y + (-10.0 * sin_angle + (-10.0) * cos_angle),
             },
-            Point2 { // Right side
+            Point2 {
+                // Right side
                 x: self.position.x + (10.0 * cos_angle - (-10.0) * sin_angle),
                 y: self.position.y + (10.0 * sin_angle + (-10.0) * cos_angle),
             },
@@ -122,7 +132,7 @@ impl LunarLander {
     fn get_flame_vertices(&self) -> Vec<Point2<f32>> {
         let cos_angle = self.angle.cos();
         let sin_angle = self.angle.sin();
-        
+
         vec![
             Point2 {
                 x: self.position.x + (-5.0 * cos_angle - (-8.0) * sin_angle),
@@ -142,7 +152,7 @@ impl LunarLander {
     pub fn get_legs_points(&self) -> Vec<Point2<f32>> {
         let cos_angle = self.angle.cos();
         let sin_angle = self.angle.sin();
-        
+
         vec![
             Point2 {
                 x: self.position.x + (-15.0 * cos_angle - (-5.0) * sin_angle),
@@ -173,8 +183,8 @@ impl LunarLander {
         if !self.landing_safety_checked {
             let velocity_magnitude = self.velocity.length();
             let relative_angle = (self.angle - surface_angle).abs();
-            
-            self.landed_safely = velocity_magnitude <= MAX_SAFE_LANDING_VELOCITY 
+
+            self.landed_safely = velocity_magnitude <= MAX_SAFE_LANDING_VELOCITY
                 && relative_angle <= MAX_SAFE_LANDING_ANGLE;
             self.landing_safety_checked = true;
         }

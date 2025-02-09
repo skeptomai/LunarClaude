@@ -1,6 +1,6 @@
-use ggez::{Context, GameResult};
 use ggez::graphics::{self, Canvas, Color, DrawMode, Mesh};
 use ggez::mint::Point2;
+use ggez::{Context, GameResult};
 use log::info;
 use rand::Rng;
 
@@ -17,7 +17,7 @@ impl Particle {
         let angle = rng.gen_range(0.0..std::f32::consts::PI * 2.0);
         let speed = rng.gen_range(50.0..200.0);
         let lifetime = rng.gen_range(0.5..1.5);
-        
+
         Particle {
             position: Point2 { x, y },
             velocity: Point2 {
@@ -34,7 +34,7 @@ impl Particle {
         self.position.x += self.velocity.x * DT;
         self.position.y += self.velocity.y * DT;
         self.lifetime -= DT;
-        
+
         // Add some gravity effect
         self.velocity.y -= 1.0;
     }
@@ -56,7 +56,10 @@ impl Explosion {
         for _ in 0..100 {
             particles.push(Particle::new(x, y));
         }
-        Explosion { particles, notified_finished: false }
+        Explosion {
+            particles,
+            notified_finished: false,
+        }
     }
 
     pub fn update(&mut self) {
@@ -75,7 +78,7 @@ impl Explosion {
         for particle in &self.particles {
             let alpha = particle.lifetime / particle.initial_lifetime;
             let size = 2.0 * (particle.lifetime / particle.initial_lifetime);
-            
+
             let color = if particle.lifetime > particle.initial_lifetime * 0.6 {
                 // White/yellow core
                 Color::new(1.0, 1.0, 0.8, alpha)
@@ -83,16 +86,10 @@ impl Explosion {
                 // Orange/red fade
                 Color::new(1.0, 0.5 * alpha, 0.0, alpha)
             };
-            
-            let particle_mesh = Mesh::new_circle(
-                ctx,
-                DrawMode::fill(),
-                particle.position,
-                size,
-                0.1,
-                color,
-            )?;
-            
+
+            let particle_mesh =
+                Mesh::new_circle(ctx, DrawMode::fill(), particle.position, size, 0.1, color)?;
+
             canvas.draw(&particle_mesh, graphics::DrawParam::default());
         }
         Ok(())

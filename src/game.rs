@@ -1,14 +1,14 @@
-use ggez::{Context, GameResult};
 use ggez::event::EventHandler;
-use ggez::graphics::{self, Canvas, Color, Text, TextFragment, PxScale};
+use ggez::graphics::{self, Canvas, Color, PxScale, Text, TextFragment};
 use ggez::input::keyboard::{KeyCode, KeyInput};
 use ggez::mint::Point2;
+use ggez::{Context, GameResult};
 use log::debug;
 use rand::Rng;
 
 use crate::lander::LunarLander;
-use crate::terrain::{Terrain, generate_terrain};
 use crate::particles::Explosion;
+use crate::terrain::{generate_terrain, Terrain};
 
 pub struct MainState {
     lander: LunarLander,
@@ -22,7 +22,7 @@ impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
         let terrain = generate_terrain(ctx)?;
         let stars = generate_stars();
-        
+
         Ok(MainState {
             lander: LunarLander::new(400.0, 100.0),
             terrain,
@@ -34,20 +34,18 @@ impl MainState {
 
     fn draw_hud(&self, canvas: &mut Canvas, _ctx: &mut Context) -> GameResult {
         let fuel_text = Text::new(
-            TextFragment::new(format!("Fuel: {:.1}%", self.lander.fuel))
-                .scale(PxScale::from(20.0))
+            TextFragment::new(format!("Fuel: {:.1}%", self.lander.fuel)).scale(PxScale::from(20.0)),
         );
         let velocity_text = Text::new(
             TextFragment::new(format!(
                 "Velocity: ({:.1}, {:.1})",
-                self.lander.velocity.x,
-                self.lander.velocity.y
+                self.lander.velocity.x, self.lander.velocity.y
             ))
-            .scale(PxScale::from(20.0))
+            .scale(PxScale::from(20.0)),
         );
         let angle_text = Text::new(
             TextFragment::new(format!("Angle: {:.1}°", self.lander.angle.to_degrees()))
-                .scale(PxScale::from(20.0))
+                .scale(PxScale::from(20.0)),
         );
 
         canvas.draw(
@@ -75,14 +73,8 @@ impl MainState {
             } else {
                 "Crash Landing!"
             };
-            let text = Text::new(
-                TextFragment::new(game_over_text)
-                    .scale(PxScale::from(40.0))
-            );
-            let screen_center = Point2 {
-                x: 400.0,
-                y: 300.0,
-            };
+            let text = Text::new(TextFragment::new(game_over_text).scale(PxScale::from(40.0)));
+            let screen_center = Point2 { x: 400.0, y: 300.0 };
             canvas.draw(
                 &text,
                 graphics::DrawParam::default()
@@ -95,10 +87,8 @@ impl MainState {
                     }),
             );
 
-            let restart_text = Text::new(
-                TextFragment::new("Press R to restart")
-                    .scale(PxScale::from(20.0))
-            );
+            let restart_text =
+                Text::new(TextFragment::new("Press R to restart").scale(PxScale::from(20.0)));
             canvas.draw(
                 &restart_text,
                 graphics::DrawParam::default()
@@ -128,7 +118,7 @@ impl EventHandler for MainState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         if !self.game_over {
             self.lander.update();
-            
+
             // Check collision with terrain
             if self.terrain.check_collision(&mut self.lander) {
                 self.game_over = true;
@@ -151,7 +141,7 @@ impl EventHandler for MainState {
             ctx,
             graphics::Color::from([0.0, 0.0, 0.08, 1.0]), // Dark blue background
         );
-        
+
         // Draw stars
         for &star in &self.stars {
             let star_mesh = graphics::Mesh::new_circle(
@@ -164,26 +154,26 @@ impl EventHandler for MainState {
             )?;
             canvas.draw(&star_mesh, graphics::DrawParam::default());
         }
-        
+
         // Draw terrain
         self.terrain.draw(&mut canvas)?;
-        
+
         // Draw lander if not crashed
         if !self.game_over || self.lander.is_landed_safely() {
             self.lander.draw(ctx, &mut canvas)?;
         }
-        
+
         // Draw explosion if crashed
         if let Some(explosion) = &self.explosion {
             explosion.draw(ctx, &mut canvas)?;
         }
-        
+
         // Draw HUD
         self.draw_hud(&mut canvas, ctx)?;
-        
+
         // Present the canvas
         canvas.finish(ctx)?;
-        
+
         Ok(())
     }
 
@@ -199,7 +189,8 @@ impl EventHandler for MainState {
                 Some(KeyCode::Left) => self.lander.rotate(-0.1),
                 Some(KeyCode::Right) => self.lander.rotate(0.1),
                 Some(KeyCode::Space) => self.lander.apply_thrust(0.5), // Half thrust option
-                Some(KeyCode::R) => { // Reset game
+                Some(KeyCode::R) => {
+                    // Reset game
                     debug!("Resetting game...");
                     self.lander = LunarLander::new(400.0, 100.0);
                     self.game_over = false;
@@ -216,11 +207,7 @@ impl EventHandler for MainState {
         Ok(())
     }
 
-    fn key_up_event(
-        &mut self,
-        _ctx: &mut Context,
-        input: KeyInput,
-    ) -> GameResult {
+    fn key_up_event(&mut self, _ctx: &mut Context, input: KeyInput) -> GameResult {
         if !self.game_over {
             match input.keycode {
                 Some(KeyCode::Up) | Some(KeyCode::Space) => self.lander.apply_thrust(0.0),
